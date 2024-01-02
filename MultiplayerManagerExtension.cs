@@ -7,13 +7,19 @@ using UnityEngine;
 [CustomPreview(typeof(Multiplayer))]
 public class NetworkManagerPreview : ObjectPreview
 {
+    private bool m_IsConnected = false;
     public NetworkManagerPreview()
     {
-        GameObject.FindObjectOfType<Multiplayer>().TryGetComponent(out MultiplayerManagerExtension extension);
-        if (extension == null)
+        if (!m_IsConnected)
         {
-            Debug.Log("MultiplayerManagerExtension added to components.");
-            GameObject.FindObjectOfType<Multiplayer>().AddComponent<MultiplayerManagerExtension>();
+            GameObject.FindObjectOfType<Multiplayer>().TryGetComponent(out MultiplayerManagerExtension extension);
+            if (extension == null)
+            {
+                GameObject.FindObjectOfType<Multiplayer>().AddComponent<MultiplayerManagerExtension>();
+                m_IsConnected = true;
+
+                Debug.Log("MultiplayerManagerExtension added to components.");
+            }
         }
     }
     public override bool HasPreviewGUI()
@@ -58,6 +64,7 @@ public class NetworkManagerPreview : ObjectPreview
 }
 #endif
 
+
 public class MultiplayerManagerExtension : AttributesSync
 {
     public static MultiplayerManagerExtension Instance { get; private set; }
@@ -71,7 +78,7 @@ public class MultiplayerManagerExtension : AttributesSync
 
     public void RequestKick(User user)
     {
-        Debug.Log($"Attempt to kick { user.Name }");
+        Debug.Log($"Attempt to kick {user.Name}");
         InvokeRemoteMethod(nameof(Kick), user);
     }
 
@@ -81,5 +88,4 @@ public class MultiplayerManagerExtension : AttributesSync
         Multiplayer.Instance.CurrentRoom.Leave();
     }
 }
-
 
